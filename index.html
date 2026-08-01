@@ -3,93 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>আমার বট ইনবক্স</title>
+    <title>Bot Inbox</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
-        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        input, button { width: 100%; padding: 10px; margin-top: 8px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { background: #0088cc; color: white; border: none; font-weight: bold; cursor: pointer; }
-        .msg-box { border-bottom: 1px solid #eee; padding: 10px 0; }
-        .sender { font-weight: bold; color: #0088cc; }
-        .text { margin-top: 4px; color: #333; }
-        .reply-input { margin-top: 5px; display: flex; gap: 5px; }
-        .reply-input input { margin: 0; }
-        .reply-input button { width: auto; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #1e1e1e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        header h1 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+        }
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+            width: 100%;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #111;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #0088cc;
+        }
+        .btn {
+            width: 100%;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn:hover {
+            background-color: #0077b5;
+        }
+        /* Inbox Screen Styles */
+        #inbox-screen {
+            display: none;
+        }
+        .bot-status {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .msg-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #0088cc;
+        }
+        .msg-user {
+            font-weight: bold;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .msg-text {
+            font-size: 14px;
+            color: #222;
+        }
+        .empty-msg {
+            color: #888;
+            font-size: 14px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
 
-    <h2>🤖 বট মেসেজ সেন্টার</h2>
+    <header>
+        <h1>🤖 Bot Inbox</h1>
+        <button id="logout-btn" class="logout-btn" onclick="logout()">লগআউট 🚪</button>
+    </header>
 
-    <div class="card" id="token-card">
-        <h3>বট টোকেন দিন:</h3>
-        <input type="text" id="botToken" placeholder="BotFather-এর টোকেন এখানে দিন">
-        <button onclick="startApp()">অ্যাপ চালু করুন</button>
+    <div class="container">
+        <!-- ১. টোকেন দিয়ে লগইন স্ক্রিন -->
+        <div id="login-screen" class="card">
+            <h2>🤖 বট মেসেজ সেন্টার</h2>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">টেলিগ্রাম বটের টোকেন দিয়ে একবার লগইন করুন:</p>
+            <input type="text" id="token-input" placeholder="BotFather-এর টোকেন এখানে দিন...">
+            <button class="btn" onclick="saveAndLogin()">লগইন ও সেভ করুন 🚀</button>
+        </div>
+
+        <!-- ২. ডাইরেক্ট ইনবক্স স্ক্রিন (অটো-লগইন) -->
+        <div id="inbox-screen">
+            <div class="bot-status" id="bot-info">
+                 বটের সাথে যুক্ত হচ্ছে...
+            </div>
+            <div class="card" style="text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 16px;">ইনবক্স মেসেজসমূহ</h3>
+                    <button style="background: none; border: none; color: #0088cc; cursor: pointer; font-weight: bold;" onclick="fetchMessages()">🔄 রিফ্রেশ</button>
+                </div>
+                <div id="messages-container" class="message-list">
+                    <p class="empty-msg" style="text-align: center;">কোনো নতুন মেসেজ নেই।</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div id="messages-container"></div>
-
     <script>
-        let token = "";
-        let lastUpdateId = 0;
+        let currentToken = "";
 
-        function startApp() {
-            token = document.getElementById("botToken").value.trim();
-            if(!token) return alert("দয়া করে একটি টোকেন দিন!");
-            
-            document.getElementById("token-card").style.display = "none";
-            fetchMessages();
-            setInterval(fetchMessages, 3000);
+        // অ্যাপ চালু হলে আগের সেভ করা টোকেন চেক করবে
+        window.onload = function() {
+            const savedToken = localStorage.getItem("telegram_bot_token");
+            if (savedToken) {
+                currentToken = savedToken;
+                showInboxScreen();
+            }
+        };
+
+        // টোকেন সেভ ও লগইন ফনশন
+        function saveAndLogin() {
+            const token = document.getElementById("token-input").value.trim();
+            if (!token) {
+                alert("দয়া করে সঠিক বট টোকেন দিন!");
+                return;
+            }
+            localStorage.setItem("telegram_bot_token", token);
+            currentToken = token;
+            showInboxScreen();
         }
 
-        async function fetchMessages() {
-            try {
-                let res = await fetch(`https://api.telegram.org/bot${token}/getUpdates?offset=${lastUpdateId + 1}`);
-                let data = await res.json();
-                
-                if(data.ok && data.result.length > 0) {
-                    data.result.forEach(item => {
-                        if(item.message) {
-                            lastUpdateId = item.update_id;
-                            displayMessage(item.message);
-                        }
-                    });
-                }
-            } catch (e) {
-                console.error("Error fetching messages", e);
+        // ইনবক্স স্ক্রিন দেখানোর ফাংশন
+        function showInboxScreen() {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("inbox-screen").style.display = "block";
+            document.getElementById("logout-btn").style.display = "block";
+
+            checkBotDetails();
+            fetchMessages();
+        }
+
+        // বট সঠিক কিনা চেক করা
+        function checkBotDetails() {
+            fetch(`https://api.telegram.org/bot${currentToken}/getMe`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.ok) {
+                        document.getElementById("bot-info").innerHTML = `✅ <b>বট যুক্ত আছে:</b> @${data.result.username}`;
+                    } else {
+                        document.getElementById("bot-info").innerHTML = `⚠️ টোকেন ভুল বা নিষ্ক্রিয়!`;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById("bot-info").innerHTML = `⚡ কানেকশন সমস্যা!`;
+                });
+        }
+
+        // মেসেজ লোড করার ফাংশন
+        function fetchMessages() {
+            fetch(`https://api.telegram.org/bot${currentToken}/getUpdates`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok && data.result.length > 0) {
+                        const container = document.getElementById("messages-container");
+                        container.innerHTML = "";
+                        
+                        data.result.reverse().forEach(item => {
+                            if (item.message) {
+                                const user = item.message.from.first_name || "অজানা ইউজার";
+                                const text = item.message.text || "[মিডিয়া/অন্যান্য ফাইল]";
+                                
+                                const msgCard = document.createElement("div");
+                                msgCard.className = "msg-item";
+                                msgCard.innerHTML = `
+                                    <div class="msg-user">👤 ${user}</div>
+                                    <div class="msg-text">${text}</div>
+                                `;
+                                container.appendChild(msgCard);
+                            }
+                        });
+                    }
+                });
+        }
+
+        // লগআউট ফনশন (সেভ করা টোকেন মুছে দেবে)
+        function logout() {
+            if (confirm("আপনি কি নিশ্চিত যে টোকেনটি মুছে দিয়ে লগআউট করতে চান?")) {
+                localStorage.removeItem("telegram_bot_token");
+                location.reload();
             }
         }
-
-        function displayMessage(msg) {
-            let container = document.getElementById("messages-container");
-            let div = document.createElement("div");
-            div.className = "card msg-box";
-            
-            let name = msg.from.first_name || "Unknown User";
-            let text = msg.text || "[ছবি বা অন্য মিডিয়া]";
-            let chatId = msg.chat.id;
-
-            div.innerHTML = `
-                <div class="sender">👤 ${name} (ID: ${chatId})</div>
-                <div class="text">💬 ${text}</div>
-                <div class="reply-input">
-                    <input type="text" id="reply-${chatId}" placeholder="রিপ্লাই লিখুন...">
-                    <button onclick="sendReply('${chatId}')">পাঠান</button>
-                </div>
-            `;
-            container.prepend(div);
-        }
-
-        async function sendReply(chatId) {
-            let replyText = document.getElementById(`reply-${chatId}`).value;
-            if(!replyText) return;
-
-            await fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(replyText)}`);
-            alert("রিপ্লাই পাঠানো হয়েছে!");
-            document.getElementById(`reply-${chatId}`).value = "";
-        }
     </script>
-
 </body>
 </html>
-
