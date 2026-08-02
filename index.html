@@ -94,12 +94,9 @@
         .btn:hover {
             background-color: #0077b5;
         }
-        
-        /* Hidden helper classes */
         .hidden {
             display: none !important;
         }
-
         .bot-status {
             background: #e1f5fe;
             color: #0288d1;
@@ -185,25 +182,20 @@
     <script>
         let currentToken = "";
 
-        // অ্যাপ চালু হলে চেক করবে ইউজার ও টোকেন সেভ আছে কিনা
         window.onload = function() {
             const savedUser = localStorage.getItem("app_user_name");
             const savedToken = localStorage.getItem("telegram_bot_token");
 
             if (!savedUser) {
-                // ১. ইউজার রেজিস্টার্ড না থাকলে রেজিস্ট্রেশন স্ক্রিন দেখাবে
                 document.getElementById("auth-screen").classList.remove("hidden");
             } else if (!savedToken) {
-                // ২. ইউজার আছে কিন্তু বট টোকেন নেই, টোকেন স্ক্রিন দেখাবে
                 document.getElementById("token-screen").classList.remove("hidden");
             } else {
-                // ৩. সব ঠিক থাকলে সরাসরি ইনবক্স দেখাবে
                 currentToken = savedToken;
                 showInboxScreen();
             }
         };
 
-        // ইউজারের রেজিস্ট্রেশন সেভ করা
         function registerUser() {
             const name = document.getElementById("reg-name").value.trim();
             const pass = document.getElementById("reg-pass").value.trim();
@@ -218,7 +210,6 @@
             document.getElementById("token-screen").classList.remove("hidden");
         }
 
-        // বট টোকেন সেভ করা
         function saveBotToken() {
             const token = document.getElementById("token-input").value.trim();
             if (!token) {
@@ -230,7 +221,6 @@
             showInboxScreen();
         }
 
-        // ইনবক্স স্ক্রিন ওপেন করা
         function showInboxScreen() {
             document.getElementById("auth-screen").classList.add("hidden");
             document.getElementById("token-screen").classList.add("hidden");
@@ -241,7 +231,6 @@
             fetchMessages();
         }
 
-        // বটের তথ্য চেক করা
         function checkBotDetails() {
             fetch(`https://api.telegram.org/bot${currentToken}/getMe`)
                 .then(res => res.json())
@@ -257,7 +246,6 @@
                 });
         }
 
-        // ক্যাশআউট মেসেজগুলো ফেচ করা
         function fetchMessages() {
             fetch(`https://api.telegram.org/bot${currentToken}/getUpdates`)
                 .then(res => res.json())
@@ -284,7 +272,6 @@
                 });
         }
 
-        // সম্পূর্ণ লগআউট (রেজিস্ট্রেশন ও টোকেন মুছে ফেলা)
         function fullLogout() {
             if (confirm("আপনি কি নিশ্চিত যে অ্যাকাউন্ট ও টোকেন মুছে দিয়ে লগআউট করতে চান?")) {
                 localStorage.clear();
