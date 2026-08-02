@@ -1,126 +1,296 @@
-package com.mhtourbd.app;
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Inbox - Secure Login</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        header {
+            background-color: #1e1e1e;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        header h1 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logout-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: none;
+        }
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex: 1;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        .card h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #111;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 15px;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #0088cc;
+        }
+        .btn {
+            width: 100%;
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn:hover {
+            background-color: #0077b5;
+        }
+        
+        /* Hidden helper classes */
+        .hidden {
+            display: none !important;
+        }
 
-import android.app.*;
-import android.os.*;
-import android.content.*;
+        .bot-status {
+            background: #e1f5fe;
+            color: #0288d1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+        .message-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .msg-item {
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #0088cc;
+        }
+        .msg-user {
+            font-weight: bold;
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .msg-text {
+            font-size: 14px;
+            color: #222;
+            white-space: pre-wrap;
+        }
+        .empty-msg {
+            color: #888;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
 
-public class MainActivity extends Activity {
+    <header>
+        <h1>🤖 Bot Inbox</h1>
+        <button id="logout-btn" class="logout-btn" onclick="fullLogout()">লগআউট 🚪</button>
+    </header>
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+    <div class="container">
 
-    }
-}<LinearLayout
-xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:orientation="vertical"
-android:gravity="center"
-android:padding="20dp">
+        <div id="auth-screen" class="card">
+            <h2>🔐 অ্যাপ অ্যাকাউন্ট</h2>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">প্রবেশ করতে আপনার নাম ও একটি পিন দিন:</p>
+            <input type="text" id="reg-name" placeholder="আপনার নাম দিন...">
+            <input type="password" id="reg-pass" placeholder="একটি গোপন পিন (যেমন: 1234)">
+            <button class="btn" onclick="registerUser()">রেজিস্ট্রেশন ও প্রবেশ করুন 🚀</button>
+        </div>
 
-<TextView
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="MH TOUR BD"
-android:textSize="30sp"
-android:textStyle="bold"/>
+        <div id="token-screen" class="card hidden">
+            <h2>🤖 টেলিগ্রাম বট টোকেন</h2>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">আপনার ক্যাশআউট বটের টোকেনটি এখানে দিন:</p>
+            <input type="text" id="token-input" placeholder="BotFather-এর টোকেন দিন...">
+            <button class="btn" onclick="saveBotToken()">টোকেন কানেক্ট করুন 🔗</button>
+        </div>
 
-<TextView
-android:layout_width="wrap_content"
-android:layout_height="wrap_content"
-android:text="FREE FIRE TOURNAMENT"
-android:textSize="18sp"/>
+        <div id="inbox-screen" class="hidden">
+            <div class="bot-status" id="bot-info">
+                 বটের সাথে যুক্ত হচ্ছে...
+            </div>
+            <div class="card" style="text-align: left;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 16px;">ইনবক্স উইথড্র রিকোয়েস্ট</h3>
+                    <button style="background: none; border: none; color: #0088cc; cursor: pointer; font-weight: bold;" onclick="fetchMessages()">🔄 রিফ্রেশ</button>
+                </div>
+                <div id="messages-container" class="message-list">
+                    <p class="empty-msg" style="text-align: center;">কোনো নতুন মেসেজ নেই।</p>
+                </div>
+            </div>
+        </div>
 
-<Button
-android:id="@+id/join_btn"
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:text="JOIN TOURNAMENT"/>
+    </div>
 
-</LinearLpackage com.mhtourbd.app;
+    <script>
+        let currentToken = "";
 
-import android.app.*;
-import android.os.*;
-import android.widget.*;
-import android.view.*;
+        // অ্যাপ চালু হলে চেক করবে ইউজার ও টোকেন সেভ আছে কিনা
+        window.onload = function() {
+            const savedUser = localStorage.getItem("app_user_name");
+            const savedToken = localStorage.getItem("telegram_bot_token");
 
-public class JoinActivity extends Activity {
-
-    EditText team, p1, p2, p3, p4, phone, trx;
-    Button submit;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.join);
-
-        team = findViewById(R.id.team);
-        p1 = findViewById(R.id.player1);
-        p2 = findViewById(R.id.player2);
-        p3 = findViewById(R.id.player3);
-        p4 = findViewById(R.id.player4);
-        phone = findViewById(R.id.phone);
-        trx = findViewById(R.id.trx);
-        submit = findViewById(R.id.submit);
-
-        submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Toast.makeText(
-                JoinActivity.this,
-                "Registration Submitted Successfully!",
-                Toast.LENGTH_SHORT
-                ).show();
-
+            if (!savedUser) {
+                // ১. ইউজার রেজিস্টার্ড না থাকলে রেজিস্ট্রেশন স্ক্রিন দেখাবে
+                document.getElementById("auth-screen").classList.remove("hidden");
+            } else if (!savedToken) {
+                // ২. ইউজার আছে কিন্তু বট টোকেন নেই, টোকেন স্ক্রিন দেখাবে
+                document.getElementById("token-screen").classList.remove("hidden");
+            } else {
+                // ৩. সব ঠিক থাকলে সরাসরি ইনবক্স দেখাবে
+                currentToken = savedToken;
+                showInboxScreen();
             }
-        });
-    }
-}ayout><ScrollView
-xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent">
+        };
 
-<LinearLayout
-android:layout_width="match_parent"
-android:layout_height="wrap_content"
-android:orientation="vertical"
-android:padding="20dp">
+        // ইউজারের রেজিস্ট্রেশন সেভ করা
+        function registerUser() {
+            const name = document.getElementById("reg-name").value.trim();
+            const pass = document.getElementById("reg-pass").value.trim();
 
+            if (!name || !pass) {
+                alert("দয়া করে নাম এবং পিন কোড উভয়ই দিন!");
+                return;
+            }
 
-<EditText
-android:id="@+id/team"
-android:hint="Team Name"/>
+            localStorage.setItem("app_user_name", name);
+            document.getElementById("auth-screen").classList.add("hidden");
+            document.getElementById("token-screen").classList.remove("hidden");
+        }
 
-<EditText
-android:id="@+id/player1"
-android:hint="Player 1 UID"/>
+        // বট টোকেন সেভ করা
+        function saveBotToken() {
+            const token = document.getElementById("token-input").value.trim();
+            if (!token) {
+                alert("দয়া করে সঠিক বট টোকেন দিন!");
+                return;
+            }
+            localStorage.setItem("telegram_bot_token", token);
+            currentToken = token;
+            showInboxScreen();
+        }
 
-<EditText
-android:id="@+id/player2"
-android:hint="Player 2 UID"/>
+        // ইনবক্স স্ক্রিন ওপেন করা
+        function showInboxScreen() {
+            document.getElementById("auth-screen").classList.add("hidden");
+            document.getElementById("token-screen").classList.add("hidden");
+            document.getElementById("inbox-screen").classList.remove("hidden");
+            document.getElementById("logout-btn").style.display = "block";
 
-<EditText
-android:id="@+id/player3"
-android:hint="Player 3 UID"/>
+            checkBotDetails();
+            fetchMessages();
+        }
 
-<EditText
-android:id="@+id/player4"
-android:hint="Player 4 UID"/>
+        // বটের তথ্য চেক করা
+        function checkBotDetails() {
+            fetch(`https://api.telegram.org/bot${currentToken}/getMe`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.ok) {
+                        document.getElementById("bot-info").innerHTML = `✅ <b>বট যুক্ত আছে:</b> @${data.result.username}`;
+                    } else {
+                        document.getElementById("bot-info").innerHTML = `⚠️ টোকেন ভুল বা নিষ্ক্রিয়!`;
+                    }
+                })
+                .catch(() => {
+                    document.getElementById("bot-info").innerHTML = `⚡ কানেকশন সমস্যা!`;
+                });
+        }
 
-<EditText
-android:id="@+id/phone"
-android:hint="Payment Number"/>
+        // ক্যাশআউট মেসেজগুলো ফেচ করা
+        function fetchMessages() {
+            fetch(`https://api.telegram.org/bot${currentToken}/getUpdates`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.ok && data.result.length > 0) {
+                        const container = document.getElementById("messages-container");
+                        container.innerHTML = "";
+                        
+                        data.result.reverse().forEach(item => {
+                            if (item.message) {
+                                const user = item.message.from.first_name || "অজানা ইউজার";
+                                const text = item.message.text || item.message.caption || "[মিডিয়া বা ফাইল]";
+                                
+                                const msgCard = document.createElement("div");
+                                msgCard.className = "msg-item";
+                                msgCard.innerHTML = `
+                                    <div class="msg-user">👤 ${user}</div>
+                                    <div class="msg-text">${text}</div>
+                                `;
+                                container.appendChild(msgCard);
+                            }
+                        });
+                    }
+                });
+        }
 
-<EditText
-android:id="@+id/trx"
-android:hint="Transaction ID"/>
-
-<Button
-android:id="@+id/submit"
-android:text="SUBMIT REGISTRATION"/>
-
-</LinearLayout>
-</ScrollView>
+        // সম্পূর্ণ লগআউট (রেজিস্ট্রেশন ও টোকেন মুছে ফেলা)
+        function fullLogout() {
+            if (confirm("আপনি কি নিশ্চিত যে অ্যাকাউন্ট ও টোকেন মুছে দিয়ে লগআউট করতে চান?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
